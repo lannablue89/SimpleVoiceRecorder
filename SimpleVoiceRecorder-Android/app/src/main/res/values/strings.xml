@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SimpleVoiceRecorder</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="record_voice">Record your voice!</string>
+    <string name="action_recorder_voice">Record Voice</string>
+</resources>
