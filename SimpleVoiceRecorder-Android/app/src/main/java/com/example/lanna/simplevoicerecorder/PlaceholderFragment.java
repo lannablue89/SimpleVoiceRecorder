@@ -18,13 +18,16 @@ import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class PlaceholderFragment extends Fragment {
 
-    private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp4";
+    private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp3";
     private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
     private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
     private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
@@ -57,17 +60,18 @@ public class PlaceholderFragment extends Fragment {
     }
 
     private void startRecordVoice() {
+        String filename = getFilename();
+        if (null == filename) {
+            makeToast("no file for saving audio, do not record!!!");
+            tbtnRecordVoice.setChecked(false);
+            return;
+        }
+
         makeToast("start Record Voice...");
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        String filename = getFilename();
-        if (null == filename) {
-            makeToast("no file for saving audio, stop record!!!");
-            return;
-        }
         recorder.setOutputFile(filename);
 
         recorder.setOnErrorListener(errorListener);
@@ -80,10 +84,6 @@ public class PlaceholderFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void makeToast(String mes) {
-         Toast.makeText(getActivity(), mes, Toast.LENGTH_SHORT).show();
     }
 
     private void stopRecordVoice() {
@@ -101,12 +101,11 @@ public class PlaceholderFragment extends Fragment {
         File folder = new File(filepath, AUDIO_RECORDER_FOLDER);
         if (!folder.exists()) {
             folder.mkdirs();
-            Log.i("lanna", "folder.exists()=" + folder.exists());
         }
-        String filename = System.currentTimeMillis() + file_exts[currentFormat];
+        String currentTimeString = new SimpleDateFormat("ddMMyy-hhmmss").format(new Date());
+        String filename = String.format("%s/%s%s", folder.getAbsolutePath(), currentTimeString, file_exts[currentFormat]);
 
-        File file = new File(folder.getAbsolutePath(), filename);
-
+        File file = new File(filename);
         if(!file.exists()) {
             try {
                 file.createNewFile();
@@ -121,17 +120,21 @@ public class PlaceholderFragment extends Fragment {
         return null;
     }
 
+    private void makeToast(String mes) {
+        Toast.makeText(getActivity(), mes, Toast.LENGTH_SHORT).show();
+    }
+
     private MediaRecorder.OnErrorListener errorListener = new MediaRecorder.OnErrorListener() {
         @Override
         public void onError(MediaRecorder mr, int what, int extra) {
-            Toast.makeText(getActivity(), "Error: " + what + ", " + extra, Toast.LENGTH_SHORT).show();
+            makeToast("Error: " + what + ", " + extra);
         }
     };
 
     private MediaRecorder.OnInfoListener infoListener = new MediaRecorder.OnInfoListener() {
         @Override
         public void onInfo(MediaRecorder mr, int what, int extra) {
-            Toast.makeText(getActivity(), "Warning: " + what + ", " + extra, Toast.LENGTH_SHORT).show();
+            makeToast("Warning: " + what + ", " + extra);
         }
     };
 
