@@ -6,6 +6,7 @@ package com.example.lanna.simplevoicerecorder.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,8 @@ import com.example.lanna.simplevoicerecorder.adapter.RecordedVoiceListAdapter;
 public class RecordedVoiceListFragment extends Fragment {
 
     RecyclerView mRecyclerView;
-    RecordedVoiceListAdapter mRecyclerViewAdapter;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,7 +36,14 @@ public class RecordedVoiceListFragment extends Fragment {
     private void init(View v) {
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
 
-        mRecyclerViewAdapter = new RecordedVoiceListAdapter();
-        mRecyclerView.setAdapter(mRecyclerViewAdapter);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new RecordedVoiceListAdapter();
+        mRecyclerView.setAdapter(mAdapter);
     }
 }

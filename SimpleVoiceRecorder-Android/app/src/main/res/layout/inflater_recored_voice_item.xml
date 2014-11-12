@@ -8,6 +8,7 @@
         android:id="@+id/item_record_voice_tv_name"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:text="@string/action_recorded_voices" />
 
 </LinearLayout>
