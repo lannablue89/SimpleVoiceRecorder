@@ -9,12 +9,13 @@ public class AudioModel {
 
     protected long timeCreated;
     protected long timeLength;
-    protected long timeCurrent;
+    protected long currentProgress;
 
-    public AudioModel(String name, long timeCreated, long timeLength) {
+    public AudioModel(String name, long timeCreated) {
         this.name = name;
         this.timeCreated = timeCreated;
-        this.timeLength = timeLength;
+        this.timeLength = 0;
+        this.currentProgress = 0;
     }
 
     public long getTimeCreated() {
@@ -33,12 +34,12 @@ public class AudioModel {
         this.timeLength = timeLength;
     }
 
-    public long getTimeCurrent() {
-        return timeCurrent;
+    public long getCurrentProgress() {
+        return currentProgress;
     }
 
-    public void setTimeCurrent(long timeCurrent) {
-        this.timeCurrent = timeCurrent;
+    public void setCurrentProgress(long currentProgress) {
+        this.currentProgress = currentProgress;
     }
 
     public String getName() {
