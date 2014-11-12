@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.lanna.simplevoicerecorder.R;
+import com.example.lanna.simplevoicerecorder.model.AudioModel;
 
 /**
  * Created by Lanna on 11/11/14.
@@ -23,7 +24,7 @@ public class RecoredVoiceViewHolder extends RecyclerView.ViewHolder {
         tvName = (TextView) itemView.findViewById(R.id.item_record_voice_tv_name);
     }
 
-    public void setName(String name) {
-        tvName.setText(name);
+    public void setData(AudioModel item) {
+        tvName.setText(item.getName());
     }
 }

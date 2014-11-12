@@ -14,6 +14,10 @@ import android.view.ViewGroup;
 
 import com.example.lanna.simplevoicerecorder.R;
 import com.example.lanna.simplevoicerecorder.adapter.RecordedVoiceListAdapter;
+import com.example.lanna.simplevoicerecorder.model.AudioModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -21,29 +25,42 @@ import com.example.lanna.simplevoicerecorder.adapter.RecordedVoiceListAdapter;
 public class RecordedVoiceListFragment extends Fragment {
 
     RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private RecordedVoiceListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_recorded_voice_list, container, false);
 
-        init(v);
+        initView(v);
+        initData();
 
         return v;
     }
 
-    private void init(View v) {
+    private void initView(View v) {
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
+        // use a linear layout manager for List
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // set adapter
         mAdapter = new RecordedVoiceListAdapter();
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private void initData() {
+        List<AudioModel> models = new ArrayList<AudioModel>();
+        AudioModel model;
+        for (int i = 0; i < 30; i++) {
+            model = new AudioModel("model "+i, System.currentTimeMillis(), 300);
+            models.add(model);
+        }
+        mAdapter.blindData(models);
     }
 }
