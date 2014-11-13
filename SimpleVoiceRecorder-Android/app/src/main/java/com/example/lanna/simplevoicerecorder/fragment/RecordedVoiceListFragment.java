@@ -30,6 +30,7 @@ public class RecordedVoiceListFragment extends Fragment {
     private RecordedVoiceListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    private MyDatabase db;
     private Cursor audiosCursor;
 
     @Override
@@ -52,27 +53,22 @@ public class RecordedVoiceListFragment extends Fragment {
         // use a linear layout manager for List
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-        // set adapter
-        MyDatabase myDatabase = new MyDatabase(getActivity());
-        audiosCursor = myDatabase.getAudios();
-        mAdapter = new RecordedVoiceListAdapter(getActivity(), audiosCursor);
-        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void initData() {
-//        List<AudioModel> models = new ArrayList<AudioModel>();
-//        AudioModel model;
-//        for (int i = 0; i < 30; i++) {
-//            model = new AudioModel("model "+i, System.currentTimeMillis());
-//            models.add(model);
-//        }
-//        mAdapter.blindData(models);
+        // set adapter
+        db = new MyDatabase(getActivity());
+        audiosCursor = db.getAudios();
+
+        mAdapter = new RecordedVoiceListAdapter(getActivity(), audiosCursor);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         audiosCursor.close();
+        db.close();
     }
+
 }

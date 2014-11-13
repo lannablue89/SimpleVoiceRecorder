@@ -19,14 +19,15 @@ public class MyDatabase extends SQLiteAssetHelper {
 
     public static String FLD_COMMON_ID              = "0 _id";
 
+    public static String FLD_AUDIO_ID               = "audioID";
     public static String FLD_AUDIO_NAME             = "name";
     public static String FLD_AUDIO_CREATED          = "timeCreated";
     public static String FLD_AUDIO_CURRENT_PROGRESS = "currentProgress";
 
-    public static byte FLD_AUDIO_INDEX_ID               = 0;
-    public static byte FLD_AUDIO_INDEX_NAME             = 1;
-    public static byte FLD_AUDIO_INDEX_CREATED          = 2;
-    public static byte FLD_AUDIO_INDEX_CURRENT_PROGRESS = 3;
+    public static byte FLD_AUDIO_ID_INDEX               = 0;
+    public static byte FLD_AUDIO_NAME_INDEX             = 1;
+    public static byte FLD_AUDIO_CREATED_INDEX          = 2;
+    public static byte FLD_AUDIO_CURRENT_PROGRESS_INDEX = 3;
 
     public MyDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -42,7 +43,6 @@ public class MyDatabase extends SQLiteAssetHelper {
         qb.setTables(sqlTables);
         Cursor c = qb.query(db, sqlSelect, null, null, null, null, null);
 
-        c.moveToFirst();
         return c;
 
     }

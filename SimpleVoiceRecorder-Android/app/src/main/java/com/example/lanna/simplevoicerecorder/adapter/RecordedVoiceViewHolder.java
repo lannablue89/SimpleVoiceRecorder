@@ -31,6 +31,6 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void updateData(Cursor audioCursorItem) {
-//        tvName.setText(audioCursorItem.getString(MyDatabase.FLD_AUDIO_INDEX_NAME));
+        tvName.setText(audioCursorItem.getString(audioCursorItem.getColumnIndex(MyDatabase.FLD_AUDIO_NAME)));
     }
 }

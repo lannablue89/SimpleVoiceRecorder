@@ -3,6 +3,7 @@ package com.example.lanna.simplevoicerecorder.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.CursorAdapter;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,7 @@ import static com.example.lanna.simplevoicerecorder.R.layout.inflater_recored_vo
  */
 public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHolder> {
 
-    private List<AudioModel> mModels;
+//    private List<AudioModel> mModels;
 
     /**
      * Recommended constructor.
@@ -40,42 +41,41 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         return vh;
     }
 
-//    @Override
-//    public void onBindViewHolder(RecordedVoiceViewHolder recordedVoiceViewHolder, int i) {
-//        recordedVoiceViewHolder.setData(getItem(i));
-//    }
-
     @Override
     public void onBindViewHolder(RecordedVoiceViewHolder holder, Cursor cursor) {
         holder.updateData(cursor);
     }
 
     @Override
-    protected void onContentChanged() {
+    protected void onContentChanged() { }
 
-    }
+//    @Override
+//    public void onBindViewHolder(RecordedVoiceViewHolder recordedVoiceViewHolder, int i) {
+//        recordedVoiceViewHolder.updateData(getItem(i));
+//    }
+//
+//    @Override
+//    public int getItemCount() {
+//        return (mModels == null) ? 0 : mModels.size();
+//    }
+//
+//    public AudioModel getItem(int position) {
+//        return (mModels == null || position < 0 || position >= mModels.size())
+//                ? null
+//                : mModels.get(position);
+//    }
+//
+//    public List<AudioModel> getModels() {
+//        return mModels;
+//    }
+//
+//    public void setModels(List<AudioModel> models) {
+//        mModels = models;
+//    }
+//
+//    public void blindData(List<AudioModel> models) {
+//        setModels(models);
+//        notifyDataSetChanged();
+//    }
 
-    @Override
-    public int getItemCount() {
-        return (mModels == null) ? 0 : mModels.size();
-    }
-
-    public AudioModel getItem(int position) {
-        return (mModels == null || position < 0 || position >= mModels.size())
-                ? null
-                : mModels.get(position);
-    }
-
-    public List<AudioModel> getModels() {
-        return mModels;
-    }
-
-    public void setModels(List<AudioModel> models) {
-        mModels = models;
-    }
-
-    public void blindData(List<AudioModel> models) {
-        setModels(models);
-        notifyDataSetChanged();
-    }
 }

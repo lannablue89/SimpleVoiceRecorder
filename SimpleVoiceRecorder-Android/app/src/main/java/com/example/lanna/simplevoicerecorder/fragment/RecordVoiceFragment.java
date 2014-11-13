@@ -16,6 +16,7 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.example.lanna.simplevoicerecorder.AudioFileHelper;
 import com.example.lanna.simplevoicerecorder.R;
 
 import java.io.File;
@@ -28,18 +29,9 @@ import java.util.Date;
  */
 public class RecordVoiceFragment extends Fragment {
 
-    private static final String AUDIO_RECORDER_FILE_EXT_MP4 = ".mp3";
-    private static final String AUDIO_RECORDER_FILE_EXT_3GP = ".3gp";
-    private static final String AUDIO_RECORDER_FOLDER = "AudioRecorder";
-    private String file_exts[] = { AUDIO_RECORDER_FILE_EXT_MP4, AUDIO_RECORDER_FILE_EXT_3GP };
-
     private ToggleButton tbtnRecordVoice;
 
     private MediaRecorder recorder;
-    private int currentFormat = 0;
-
-    public RecordVoiceFragment() {
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,7 +53,7 @@ public class RecordVoiceFragment extends Fragment {
     }
 
     private void startRecordVoice() {
-        String filename = getFilename();
+        String filename = AudioFileHelper.getFilename();
         if (null == filename) {
             makeToast("no file for saving audio, do not record!!!");
             tbtnRecordVoice.setChecked(false);
@@ -95,30 +87,6 @@ public class RecordVoiceFragment extends Fragment {
             recorder.release(); // Now the object cannot be reused
             recorder = null;
         }
-    }
-
-    private String getFilename() {
-        String filepath = Environment.getExternalStorageDirectory().getPath();
-        File folder = new File(filepath, AUDIO_RECORDER_FOLDER);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-        String currentTimeString = new SimpleDateFormat("ddMMyy-hhmmss").format(new Date());
-        String filename = String.format("%s/%s%s", folder.getAbsolutePath(), currentTimeString, file_exts[currentFormat]);
-
-        File file = new File(filename);
-        if(!file.exists()) {
-            try {
-                file.createNewFile();
-                Log.i("lanna", "created file for saving at " + file);
-                return filename;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Log.i("lanna", "fail to create file for saving at " + file);
-        return null;
     }
 
     private void makeToast(String mes) {
