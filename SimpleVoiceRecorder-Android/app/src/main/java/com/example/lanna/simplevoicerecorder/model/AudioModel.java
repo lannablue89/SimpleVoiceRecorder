@@ -9,15 +9,7 @@ import com.example.lanna.simplevoicerecorder.MyDatabase;
  */
 public class AudioModel {
 
-    public String getAudioID() {
-        return audioID;
-    }
-
-    public void setAudioID(String audioID) {
-        this.audioID = audioID;
-    }
-
-    protected String audioID;
+    protected long audioID;
     protected String name;
 
     protected long timeCreated;
@@ -32,7 +24,19 @@ public class AudioModel {
     }
 
     public AudioModel(Cursor c) {
-        name = c.getString(c.getColumnIndex(MyDatabase.FLD_AUDIO_NAME));
+        this.audioID = c.getLong(c.getColumnIndex(MyDatabase.FLD_ID_ALIAS));
+        this.name = c.getString(c.getColumnIndex(MyDatabase.FLD_AUDIO_NAME));
+        this.timeCreated = c.getLong(c.getColumnIndex(MyDatabase.FLD_AUDIO_CREATED));
+        this.timeLength = 0;
+        this.currentProgress = c.getLong(c.getColumnIndex(MyDatabase.FLD_AUDIO_CURRENT_PROGRESS));
+    }
+
+    public long getAudioID() {
+        return audioID;
+    }
+
+    public void setAudioID(long audioID) {
+        this.audioID = audioID;
     }
 
     public long getTimeCreated() {

@@ -58,8 +58,18 @@ public class RecordedVoiceListFragment extends Fragment {
     private void initData() {
         // set adapter
         db = new MyDatabase(getActivity());
-        audiosCursor = db.getAudios();
 
+        // test database actions
+//        audiosCursor = db.getAudios();
+//        audiosCursor.moveToFirst();
+//        AudioModel firstModel = new AudioModel(audiosCursor);
+//        firstModel.setName("updated model 1st 2");
+//        db.insertOrUpdateAudio(firstModel); // test update
+//        db.deleteAudio(firstModel); // test delete
+//        db.insertOrUpdateAudio(new AudioModel("insert new ", System.currentTimeMillis())); // test insert
+
+        // get audios and show on list
+        audiosCursor = db.getAudios();
         mAdapter = new RecordedVoiceListAdapter(getActivity(), audiosCursor);
         mRecyclerView.setAdapter(mAdapter);
     }

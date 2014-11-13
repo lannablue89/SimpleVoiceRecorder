@@ -1,10 +1,13 @@
 package com.example.lanna.simplevoicerecorder;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.Uri;
 
+import com.example.lanna.simplevoicerecorder.model.AudioModel;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 /**
@@ -17,11 +20,12 @@ public class MyDatabase extends SQLiteAssetHelper {
 
     public static String TBL_AUDIO = "Audio";
 
-    public static String FLD_COMMON_ID              = "0 _id";
+    public static String FLD_ID_ALIAS               = "_id"; // used in CursorAdapter
+    public static String FLD_ROW_ID                 = "rowid " + FLD_ID_ALIAS;
 
     public static String FLD_AUDIO_ID               = "audioID";
     public static String FLD_AUDIO_NAME             = "name";
-    public static String FLD_AUDIO_CREATED          = "timeCreated";
+    public static String FLD_AUDIO_CREATED          = "created";
     public static String FLD_AUDIO_CURRENT_PROGRESS = "currentProgress";
 
     public static byte FLD_AUDIO_ID_INDEX               = 0;
@@ -37,13 +41,42 @@ public class MyDatabase extends SQLiteAssetHelper {
         SQLiteDatabase db = getReadableDatabase();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
-        String sqlTables = TBL_AUDIO;
-        String [] sqlSelect = { FLD_COMMON_ID, FLD_AUDIO_NAME, FLD_AUDIO_CREATED, FLD_AUDIO_CURRENT_PROGRESS };
+        String [] sqlSelect = { FLD_ROW_ID, FLD_AUDIO_NAME, FLD_AUDIO_CREATED, FLD_AUDIO_CURRENT_PROGRESS };
 
-        qb.setTables(sqlTables);
+        qb.setTables(TBL_AUDIO);
         Cursor c = qb.query(db, sqlSelect, null, null, null, null, null);
 
         return c;
-
     }
+
+    public long insertOrUpdateAudio(AudioModel audioModel) {
+        long result = -1;
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FLD_AUDIO_NAME, audioModel.getName());
+        values.put(FLD_AUDIO_CREATED, audioModel.getTimeCreated());
+        values.put(FLD_AUDIO_CURRENT_PROGRESS, audioModel.getCurrentProgress());
+
+        if (audioModel.getAudioID() > 0) {
+            result = db.update(TBL_AUDIO, values, FLD_AUDIO_ID + "=" + audioModel.getAudioID(), null);
+        } else {
+            result = db.insert(TBL_AUDIO, null, values);
+            audioModel.setAudioID(result);
+        }
+        db.close();
+        return result;
+    }
+
+    public int deleteAudio(AudioModel audioModel) {
+        int result = -1;
+        SQLiteDatabase db = getWritableDatabase();
+
+        if (audioModel.getAudioID() > 0) {
+            result = db.delete(TBL_AUDIO, FLD_AUDIO_ID + "=" + audioModel.getAudioID(), null);
+        }
+
+        return result;
+    }
+
 }
