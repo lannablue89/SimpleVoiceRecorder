@@ -7,4 +7,6 @@
     <string name="record_voice">Record your voice!</string>
     <string name="action_record_voice">Record Voice</string>
     <string name="action_recorded_voices">Voice List</string>
+
+    <string name="audio_progress_default_text">00:00/00:00</string>
 </resources>

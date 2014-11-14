@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.CursorAdapter;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,11 +44,13 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
     @Override
     public void onBindViewHolder(RecordedVoiceViewHolder holder, Cursor cursor) {
-        holder.updateData(cursor);
+        holder.updateData(mContext, cursor);
     }
 
     @Override
-    protected void onContentChanged() { }
+    protected void onContentChanged() {
+        Log.i("lanna", "onContentChanged");
+    }
 
 //    @Override
 //    public void onBindViewHolder(RecordedVoiceViewHolder recordedVoiceViewHolder, int i) {

@@ -13,13 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.lanna.simplevoicerecorder.MyDatabase;
+import com.example.lanna.simplevoicerecorder.database.MyDatabase;
 import com.example.lanna.simplevoicerecorder.R;
 import com.example.lanna.simplevoicerecorder.adapter.RecordedVoiceListAdapter;
-import com.example.lanna.simplevoicerecorder.model.AudioModel;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
