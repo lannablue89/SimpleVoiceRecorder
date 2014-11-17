@@ -75,7 +75,7 @@ public class RecordVoiceFragment extends Fragment {
         }
 
         makeToast("start Record Voice...");
-        mAudioModel = new AudioModel(filename, filename, timeCreate.getTime());
+        mAudioModel = new AudioModel(filename, filePath, timeCreate.getTime());
 
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);

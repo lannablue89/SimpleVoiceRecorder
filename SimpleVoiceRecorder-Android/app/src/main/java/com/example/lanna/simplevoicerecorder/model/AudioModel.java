@@ -47,9 +47,9 @@ public class AudioModel {
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("audioID:").append(audioID)
+                .append("id:").append(audioID)
                 .append(", name:").append(name)
-//                .append(", filename:").append(filename)
+                .append(", filename:").append(filename)
 //                .append(", timeCreated:").append(timeCreated)
 //                .append(", currentProgress:").append(currentProgress)
                 .toString();
