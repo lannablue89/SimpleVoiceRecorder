@@ -5,6 +5,7 @@ package com.example.lanna.simplevoicerecorder.fragment;
  */
 
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +18,8 @@ import com.example.lanna.simplevoicerecorder.database.MyDatabase;
 import com.example.lanna.simplevoicerecorder.R;
 import com.example.lanna.simplevoicerecorder.adapter.RecordedVoiceListAdapter;
 
+import java.net.URI;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -27,7 +30,6 @@ public class RecordedVoiceListFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
 
     private MyDatabase db;
-    private Cursor audiosCursor;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,6 +54,7 @@ public class RecordedVoiceListFragment extends Fragment {
     }
 
     private void initData() {
+
         // set adapter
         db = new MyDatabase(getActivity());
 
@@ -65,15 +68,15 @@ public class RecordedVoiceListFragment extends Fragment {
 //        db.insertOrUpdateAudio(new AudioModel("insert new ", System.currentTimeMillis())); // test insert
 
         // get audios and show on list
-        audiosCursor = db.getAudios();
-        mAdapter = new RecordedVoiceListAdapter(getActivity(), audiosCursor);
+        mAdapter = new RecordedVoiceListAdapter(getActivity(), db);
         mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        audiosCursor.close();
+        mAdapter.onDestroy();
+        mAdapter = null;
         db.close();
     }
 

@@ -4,6 +4,7 @@ package com.example.lanna.simplevoicerecorder.fragment;
  * Created by Lanna on 11/7/14.
  */
 
+import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -33,12 +34,20 @@ public class RecordVoiceFragment extends Fragment {
     private MediaRecorder mRecorder;
     private MyDatabase mDb;
     private AudioModel mAudioModel;
+    Uri mUri = Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_record_voice, container, false);
 
-        mTbtnRecordVoice = (ToggleButton) rootView.findViewById(R.id.toggleButton_recordVoice);
+        initView(rootView);
+        initData();
+
+        return rootView;
+    }
+
+    private void initView(View v) {
+        mTbtnRecordVoice = (ToggleButton) v.findViewById(R.id.toggleButton_recordVoice);
         mTbtnRecordVoice.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -49,10 +58,10 @@ public class RecordVoiceFragment extends Fragment {
                 }
             }
         });
+    }
 
+    private void initData() {
         mDb = new MyDatabase(getActivity());
-
-        return rootView;
     }
 
     private void startRecordVoice() {
@@ -95,7 +104,7 @@ public class RecordVoiceFragment extends Fragment {
             mRecorder = null;
 
             // save audio info
-            mDb.insertOrUpdateAudio(mAudioModel);
+            mDb.insertOrUpdateAudioAndNotify(getActivity(), mUri, mAudioModel);
 
             // test data after db action
 //            try {

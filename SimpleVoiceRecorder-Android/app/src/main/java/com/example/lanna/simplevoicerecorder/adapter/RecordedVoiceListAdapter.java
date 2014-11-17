@@ -2,6 +2,7 @@ package com.example.lanna.simplevoicerecorder.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.v7.widget.CursorAdapter;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.lanna.simplevoicerecorder.database.MyDatabase;
 import com.example.lanna.simplevoicerecorder.model.AudioModel;
 
 import java.util.List;
@@ -22,6 +24,8 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
 //    private List<AudioModel> mModels;
 
+    private MyDatabase mDb;
+
     /**
      * Recommended constructor.
      *
@@ -30,8 +34,10 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
      * @param flags   Flags used to determine the behavior of the adapter;
      *                Currently it accept {@link #FLAG_REGISTER_CONTENT_OBSERVER}.
      */
-    public RecordedVoiceListAdapter(Context context, Cursor c) {
-        super(context, c, FLAG_REGISTER_CONTENT_OBSERVER);
+    public RecordedVoiceListAdapter(Context context, MyDatabase db) {
+        super(context, db.getAudios(context, Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE)),
+                FLAG_REGISTER_CONTENT_OBSERVER);
+        mDb = db;
     }
 
     @Override
@@ -50,6 +56,11 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
     @Override
     protected void onContentChanged() {
         Log.i("lanna", "onContentChanged");
+        changeCursor(mDb.getAudios(mContext, Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE)));
+    }
+
+    public void onDestroy() {
+        mCursor.close();
     }
 
 //    @Override

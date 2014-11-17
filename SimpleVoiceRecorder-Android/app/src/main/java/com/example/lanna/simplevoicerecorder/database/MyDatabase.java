@@ -30,16 +30,18 @@ public class MyDatabase extends SQLiteAssetHelper {
     public static String FLD_AUDIO_CREATED          = "created";
     public static String FLD_AUDIO_CURRENT_PROGRESS = "current_progress";
 
-    public static byte FLD_AUDIO_ID_INDEX               = 0;
-    public static byte FLD_AUDIO_NAME_INDEX             = 1;
-    public static byte FLD_AUDIO_CREATED_INDEX          = 2;
-    public static byte FLD_AUDIO_CURRENT_PROGRESS_INDEX = 3;
+//    public static byte FLD_AUDIO_ID_INDEX               = 0;
+//    public static byte FLD_AUDIO_NAME_INDEX             = 1;
+//    public static byte FLD_AUDIO_CREATED_INDEX          = 2;
+//    public static byte FLD_AUDIO_CURRENT_PROGRESS_INDEX = 3;
+
+    public static final String URI_TO_NOTIFY_DATA_UPDATE = "content://load_st";
 
     public MyDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    public Cursor getAudios() {
+    public Cursor getAudios(Context context, Uri uri) {
         SQLiteDatabase db = getReadableDatabase();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
@@ -47,12 +49,15 @@ public class MyDatabase extends SQLiteAssetHelper {
 
         qb.setTables(TBL_AUDIO);
         Cursor c = qb.query(db, sqlSelect, FLD_AUDIO_FILENAME + " IS NOT NULL ", null, null, null, null);
-
+        if (context != null && uri != null) {
+            c.setNotificationUri(context.getContentResolver(), uri);
+            Log.i("lanna", "content resolver setNotificationUri:"+uri);
+        }
         return c;
     }
 
-    public long insertOrUpdateAudio(AudioModel audioModel) {
-        long result = -1;
+    public long insertOrUpdateAudioAndNotify(Context context, Uri uri, AudioModel audioModel) {
+        long result;
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -70,6 +75,11 @@ public class MyDatabase extends SQLiteAssetHelper {
             Log.i("lanna", "insert at " + result + ", audio " + audioModel);
         }
         db.close();
+
+        if (result > 0 && context != null && uri != null) {
+            context.getContentResolver().notifyChange(uri, null);
+            Log.i("lanna", "content resolver notifyChange uri:"+uri);
+        }
         return result;
     }
 
