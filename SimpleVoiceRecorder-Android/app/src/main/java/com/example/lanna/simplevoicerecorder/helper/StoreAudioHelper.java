@@ -20,19 +20,21 @@ import java.util.Date;
  */
 public class StoreAudioHelper {
 
-    private static final String AUDIO_RECORDER_FILE_EXT_MP3 = ".mp3";
-    private static final String AUDIO_RECORDER_FOLDER = Environment.getExternalStorageDirectory().getPath() + "/AudioRecorder";
+    public static final String AUDIO_RECORDER_FILE_EXT_MP3      = ".mp3";
+    private static final String AUDIO_RECORDER_FOLDER           = "AudioRecorder";
+    private static final String AUDIO_RECORDER_STORAGE_FOLDER   = Environment.getExternalStorageDirectory() + "/" + AUDIO_RECORDER_FOLDER;
 
     public static String createFileWithName(String filename) {
         // check and create if not exist folder for saving files
-        File folder = new File(AUDIO_RECORDER_FOLDER);
+        File folder = new File(AUDIO_RECORDER_STORAGE_FOLDER);
         if (!folder.exists()) {
             folder.mkdirs();
         }
 
-        String filePath = String.format("%s/%s%s", AUDIO_RECORDER_FOLDER, filename, AUDIO_RECORDER_FILE_EXT_MP3);
-        File file = new File(filePath);
-        if(!file.exists()) {
+        String filePath = String.format("%s/%s", AUDIO_RECORDER_FOLDER, filename);
+        String fullFileStoragePath = getFileStoragePath(filePath);
+        File file = new File(fullFileStoragePath);
+        if (!file.exists()) {
             try {
                 file.createNewFile();
                 Log.i("lanna", "created file for saving at " + file);
@@ -46,8 +48,9 @@ public class StoreAudioHelper {
         return null;
     }
 
-    public static String getFilePath(String filename) {
-        return AUDIO_RECORDER_FOLDER + "/" + filename;
+    public static String getFileStoragePath(String filePath) {
+        return String.format("%s/%s",
+                Environment.getExternalStorageDirectory(), filePath);
     }
 
     /**
@@ -57,7 +60,7 @@ public class StoreAudioHelper {
      * @return -1 if file not existed
      */
     public static long getDuration(Context context, String name) {
-        MediaPlayer mp = MediaPlayer.create(context, Uri.parse(getFilePath(name)));
+        MediaPlayer mp = MediaPlayer.create(context, Uri.parse(getFileStoragePath(name)));
         if (mp != null) {
             int duration = mp.getDuration();
             mp.release();
@@ -67,7 +70,7 @@ public class StoreAudioHelper {
     }
 
     public static void writeDBToSD(Context context, String DB_NAME) throws IOException {
-        String DB_PATH = null;
+        String DB_PATH;
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             DB_PATH = context.getFilesDir().getAbsolutePath().replace("files", "databases") + File.separator;
 //        }
@@ -75,7 +78,7 @@ public class StoreAudioHelper {
 //            DB_PATH = context.getFilesDir().getPath() + context.getPackageName() + "/databases/";
 //        }
 
-        File sd = new File(AUDIO_RECORDER_FOLDER);
+        File sd = new File(AUDIO_RECORDER_STORAGE_FOLDER);
         if (sd.canWrite()) {
             String currentDBPath = DB_NAME;
             File currentDB = new File(DB_PATH, currentDBPath);
@@ -90,6 +93,7 @@ public class StoreAudioHelper {
                 src.close();
                 dst.close();
             }
+            Log.i("lanna", "writeDBToSD done");
         }
     }
 }

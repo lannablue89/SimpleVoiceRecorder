@@ -62,7 +62,7 @@ public class MyDatabase extends SQLiteAssetHelper {
 
         ContentValues values = new ContentValues();
         values.put(FLD_AUDIO_NAME, audioModel.getName());
-        values.put(FLD_AUDIO_FILENAME, audioModel.getFilename());
+        values.put(FLD_AUDIO_FILENAME, audioModel.getFilePath());
         values.put(FLD_AUDIO_CREATED, audioModel.getTimeCreated());
         values.put(FLD_AUDIO_CURRENT_PROGRESS, audioModel.getCurrentProgress());
 

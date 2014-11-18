@@ -24,6 +24,7 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements 
 
     private ImageView imgPlayPause;
     private TextView tvName;
+    private TextView tvFilePath;
     private TextView tvCurrentProgress;
 
     private RecordedVoiceItemClickListener mItemClickListener;
@@ -39,6 +40,7 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements 
     private void initView(View itemView) {
         imgPlayPause = (ImageView) itemView.findViewById(R.id.item_record_voice_ic_play_pause);
         tvName = (TextView) itemView.findViewById(R.id.item_record_voice_tv_name);
+        tvFilePath = (TextView) itemView.findViewById(R.id.item_record_voice_tv_file_path);
         tvCurrentProgress = (TextView) itemView.findViewById(R.id.item_record_voice_tv_progress);
 
         imgPlayPause.setOnClickListener(this);
@@ -59,8 +61,9 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements 
     public void updateData(AudioModel model) {
         mModel = model;
 
-        imgPlayPause.setSelected(false); // show ic play as default
+        imgPlayPause.setSelected(false); // default false: show ic play
         tvName.setText(mModel.getName());
+        tvFilePath.setText(mModel.getFilePath());
         tvCurrentProgress.setText(mModel.getCurrentProgress()+"/"+mModel.getTimeLength());
     }
 

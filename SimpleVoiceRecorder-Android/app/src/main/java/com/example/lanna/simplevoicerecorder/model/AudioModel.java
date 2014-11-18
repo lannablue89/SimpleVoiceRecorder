@@ -12,17 +12,8 @@ import com.example.lanna.simplevoicerecorder.helper.StoreAudioHelper;
 public class AudioModel {
 
     protected long audioID;
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
     protected String name;
-    protected String filename;
+    protected String filePath;
 
     protected long timeCreated;
     protected long timeLength;
@@ -30,7 +21,7 @@ public class AudioModel {
 
     public AudioModel(String name, String filename, long timeCreated) {
         this.name = name;
-        this.filename = filename;
+        this.filePath = filename;
         this.timeCreated = timeCreated;
         this.currentProgress = 0;
     }
@@ -38,7 +29,7 @@ public class AudioModel {
     public AudioModel(Context context, Cursor c) {
         this.audioID = c.getLong(c.getColumnIndex(MyDatabase.FLD_ID_ALIAS));
         this.name = c.getString(c.getColumnIndex(MyDatabase.FLD_AUDIO_NAME));
-        this.filename = c.getString(c.getColumnIndex(MyDatabase.FLD_AUDIO_FILENAME));
+        this.filePath = c.getString(c.getColumnIndex(MyDatabase.FLD_AUDIO_FILENAME));
         this.timeCreated = c.getLong(c.getColumnIndex(MyDatabase.FLD_AUDIO_CREATED));
         this.currentProgress = c.getLong(c.getColumnIndex(MyDatabase.FLD_AUDIO_CURRENT_PROGRESS));
         updateTimeLength(context);
@@ -47,9 +38,9 @@ public class AudioModel {
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("id:").append(audioID)
-                .append(", name:").append(name)
-                .append(", filename:").append(filename)
+//                .append("id:").append(audioID)
+//                .append(", name:").append(name)
+                .append(", filename:").append(filePath)
 //                .append(", timeCreated:").append(timeCreated)
 //                .append(", currentProgress:").append(currentProgress)
                 .toString();
@@ -61,6 +52,14 @@ public class AudioModel {
 
     public void setAudioID(long audioID) {
         this.audioID = audioID;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public long getTimeCreated() {

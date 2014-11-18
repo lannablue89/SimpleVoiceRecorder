@@ -6,7 +6,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v7.widget.CursorAdapter;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,9 @@ import android.widget.ImageView;
 
 import com.example.lanna.simplevoicerecorder.database.MyDatabase;
 import com.example.lanna.simplevoicerecorder.helper.StoreAudioHelper;
+import com.example.lanna.simplevoicerecorder.helper.Utilities;
 import com.example.lanna.simplevoicerecorder.model.AudioModel;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -26,12 +25,13 @@ import static com.example.lanna.simplevoicerecorder.R.layout.inflater_recored_vo
  * Created by Lanna on 11/11/14.
  */
 public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHolder>
-        implements RecordedVoiceViewHolder.RecordedVoiceItemClickListener {
+        implements RecordedVoiceViewHolder.RecordedVoiceItemClickListener,
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     private MyDatabase mDb;
-    private MediaPlayer sound;
-    private String audioName;
-
+    private MediaPlayer mMediaPlayer;
+    private String mFilePath;
+    private ImageView mIvCurrentPlayPauseIcon;
 
     public RecordedVoiceListAdapter(Context context, MyDatabase db) {
         super(context,
@@ -61,41 +61,60 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
     @Override
     public void onPlayPauseClick(ImageView ivPlayPause, int position, AudioModel item) {
-        Log.i("lanna", "onPlayPauseClick at " + position + ":" + item);
-        if (item == null || TextUtils.isEmpty(item.getFilename())) {
+        mIvCurrentPlayPauseIcon = ivPlayPause;
+        Utilities.makeToast(mContext, "onPlayPauseClick at " + position + ":" + item);
+        if (item == null || TextUtils.isEmpty(item.getFilePath())) {
+            Utilities.makeToast(mContext, "onPlayPauseClick at item not available - stop");
+            mIvCurrentPlayPauseIcon.setSelected(false);
             return;
         }
 
-        if (sound == null) {
-            sound = new MediaPlayer();
+        // TODO get set length of file (duration value)
+
+        if (mMediaPlayer == null) {
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setOnErrorListener(this);
+            mMediaPlayer.setOnCompletionListener(this);
         }
 
-        if (audioName != null && !audioName.equals(item.getFilename())) {
-            audioName = item.getFilename();
-            sound.reset();
+        String fullFileStoragePath = StoreAudioHelper.getFileStoragePath(item.getFilePath());
+        if (TextUtils.isEmpty(mFilePath) || !mFilePath.equals(fullFileStoragePath)) {
+            mFilePath = fullFileStoragePath;
+//            mMediaPlayer.reset();
             try {
-                File file = mContext.getFileStreamPath(audioName);
-                Uri uri = Uri.fromFile(file);
-                sound.setDataSource(mContext, uri);
-                sound.prepare();
-                sound.start();
+                FileInputStream fileInputStream = new FileInputStream(mFilePath);
+                mMediaPlayer.setDataSource(fileInputStream.getFD());
+                fileInputStream.close();
+
+                mMediaPlayer.prepare();
+                mMediaPlayer.start();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         else {
-            if (sound.isPlaying()) {
-                sound.pause();
+            if (mMediaPlayer.isPlaying()) {
+                mMediaPlayer.pause();
             } else {
-                sound.start();
+                mMediaPlayer.start();
             }
         }
-        ivPlayPause.setSelected(sound.isPlaying());
 
+        mIvCurrentPlayPauseIcon.setSelected(mMediaPlayer.isPlaying());
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        mIvCurrentPlayPauseIcon.setSelected(false);
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        Utilities.makeToast(mContext, "Media Error: " + what + ", " + extra);
+        return false;
     }
 
     public void onDestroy() {
         mCursor.close();
     }
-
 }
