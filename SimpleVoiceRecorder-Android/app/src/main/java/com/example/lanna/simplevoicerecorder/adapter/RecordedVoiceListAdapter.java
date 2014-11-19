@@ -37,7 +37,7 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
     private MyDatabase mDb;
     private MediaPlayer mMediaPlayer;
-    private String mFilePath;
+    private int mFileIndex = -1;
     private ImageView mIvCurrentPlayPauseIcon;
 
     private Handler mHandler;
@@ -71,7 +71,6 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
     @Override
     public void onPlayPauseClick(ImageView ivPlayPause, int position, AudioModel item) {
-        mIvCurrentPlayPauseIcon = ivPlayPause;
 //        Utilities.makeToast(mContext, "onPlayPauseClick at " + position + ":" + item);
         if (null == item || TextUtils.isEmpty(item.getFilePath())) {
             Utilities.makeToast(mContext, "play item not available - stop");
@@ -85,15 +84,17 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 //            mMediaPlayer = MediaPlayer.create(mContext, R.raw.abc);
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setVolume(1,1);
+            mMediaPlayer.setVolume(1, 1);
             mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.setOnCompletionListener(this);
         }
 
-        String fullFileStoragePath = StoreAudioHelper.getFileStoragePath(item.getFilePath()); // "Download/abcd.mp3"
         // check play new audio
-        if (TextUtils.isEmpty(mFilePath) || !mFilePath.equals(fullFileStoragePath)) {
-            startPlayMusic(fullFileStoragePath);
+        if (mFileIndex < 0 || mFileIndex != position) {
+            setIconPlayOrPause(false);
+            mIvCurrentPlayPauseIcon = ivPlayPause;
+            mFileIndex = position;
+            startPlayMusic(StoreAudioHelper.getFileStoragePath(item.getFilePath())); // "Download/abcd.mp3"
         }
         // continue play/pause current audio
         else if (null != mMediaPlayer) {
@@ -107,14 +108,13 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         }
     }
 
-    private void startPlayMusic(String fullFileStoragePath) {
-        mFilePath = fullFileStoragePath;
+    private void startPlayMusic(final String fullFileStoragePath) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 mMediaPlayer.reset(); // to set other data source FD
                 try {
-                    FileInputStream fileInputStream = new FileInputStream(mFilePath); // FileNotFoundException
+                    FileInputStream fileInputStream = new FileInputStream(fullFileStoragePath); // FileNotFoundException
                     mMediaPlayer.setDataSource(fileInputStream.getFD()); // IOException, IllegalArgumentException, IllegalStateException
                     fileInputStream.close();
 
@@ -173,6 +173,8 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
     private void setIconPlayOrPause(boolean isPlay) {
 //        Log.i("lanna", "updateIconPlayPause isPlay="+isPlay);
-        mIvCurrentPlayPauseIcon.setSelected(isPlay);
+        if (null != mIvCurrentPlayPauseIcon) {
+            mIvCurrentPlayPauseIcon.setSelected(isPlay);
+        }
     }
 }
