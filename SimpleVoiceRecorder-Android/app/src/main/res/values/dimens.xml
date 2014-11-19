@@ -7,4 +7,6 @@
     <dimen name="inflater_icon_padding">8dp</dimen>
     <dimen name="inflater_text_padding">8dp</dimen>
 
+    <dimen name="item_recorded_audio_height">72dp</dimen>
+
 </resources>

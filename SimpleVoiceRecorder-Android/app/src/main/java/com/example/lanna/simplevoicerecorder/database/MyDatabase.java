@@ -51,7 +51,7 @@ public class MyDatabase extends SQLiteAssetHelper {
         Cursor c = qb.query(db, sqlSelect, FLD_AUDIO_FILENAME + " IS NOT NULL ", null, null, null, null);
         if (context != null && uri != null) {
             c.setNotificationUri(context.getContentResolver(), uri);
-            Log.i("lanna", "content resolver setNotificationUri:"+uri);
+//            Log.i("lanna", "content resolver setNotificationUri:"+uri);
         }
         return c;
     }

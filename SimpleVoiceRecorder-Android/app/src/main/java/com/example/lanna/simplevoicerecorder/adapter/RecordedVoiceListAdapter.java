@@ -2,10 +2,14 @@ package com.example.lanna.simplevoicerecorder.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.CursorAdapter;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +21,7 @@ import com.example.lanna.simplevoicerecorder.helper.Utilities;
 import com.example.lanna.simplevoicerecorder.model.AudioModel;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static com.example.lanna.simplevoicerecorder.R.layout.inflater_recored_voice_item;
@@ -25,19 +30,24 @@ import static com.example.lanna.simplevoicerecorder.R.layout.inflater_recored_vo
  * Created by Lanna on 11/11/14.
  */
 public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHolder>
-        implements RecordedVoiceViewHolder.RecordedVoiceItemClickListener,
+        implements RecordedVoiceViewHolder.RecordedVoiceItemClickListener, Handler.Callback,
         MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
+
+    private static final int UPDATE_STATE_PLAYING = 1;
 
     private MyDatabase mDb;
     private MediaPlayer mMediaPlayer;
     private String mFilePath;
     private ImageView mIvCurrentPlayPauseIcon;
 
+    private Handler mHandler;
+
     public RecordedVoiceListAdapter(Context context, MyDatabase db) {
         super(context,
                 db.getAudios(context, Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE)),
                 FLAG_REGISTER_CONTENT_OBSERVER);
         mDb = db;
+        mHandler = new Handler(this);
     }
 
     @Override
@@ -62,50 +72,80 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
     @Override
     public void onPlayPauseClick(ImageView ivPlayPause, int position, AudioModel item) {
         mIvCurrentPlayPauseIcon = ivPlayPause;
-        Utilities.makeToast(mContext, "onPlayPauseClick at " + position + ":" + item);
-        if (item == null || TextUtils.isEmpty(item.getFilePath())) {
-            Utilities.makeToast(mContext, "onPlayPauseClick at item not available - stop");
-            mIvCurrentPlayPauseIcon.setSelected(false);
+//        Utilities.makeToast(mContext, "onPlayPauseClick at " + position + ":" + item);
+        if (null == item || TextUtils.isEmpty(item.getFilePath())) {
+            Utilities.makeToast(mContext, "play item not available - stop");
+            setIconPlayOrPause(false);
             return;
         }
 
         // TODO get set length of file (duration value)
 
-        if (mMediaPlayer == null) {
+        if (null == mMediaPlayer) {
+//            mMediaPlayer = MediaPlayer.create(mContext, R.raw.abc);
             mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setVolume(1,1);
             mMediaPlayer.setOnErrorListener(this);
             mMediaPlayer.setOnCompletionListener(this);
         }
 
-        String fullFileStoragePath = StoreAudioHelper.getFileStoragePath(item.getFilePath());
+        String fullFileStoragePath = StoreAudioHelper.getFileStoragePath(item.getFilePath()); // "Download/abcd.mp3"
+        // check play new audio
         if (TextUtils.isEmpty(mFilePath) || !mFilePath.equals(fullFileStoragePath)) {
-            mFilePath = fullFileStoragePath;
-//            mMediaPlayer.reset();
-            try {
-                FileInputStream fileInputStream = new FileInputStream(mFilePath);
-                mMediaPlayer.setDataSource(fileInputStream.getFD());
-                fileInputStream.close();
-
-                mMediaPlayer.prepare();
-                mMediaPlayer.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            startPlayMusic(fullFileStoragePath);
         }
-        else {
+        // continue play/pause current audio
+        else if (null != mMediaPlayer) {
             if (mMediaPlayer.isPlaying()) {
                 mMediaPlayer.pause();
+                setIconPlayOrPause(false);
             } else {
                 mMediaPlayer.start();
+                setIconPlayOrPause(true);
             }
         }
+    }
 
-        mIvCurrentPlayPauseIcon.setSelected(mMediaPlayer.isPlaying());
+    private void startPlayMusic(String fullFileStoragePath) {
+        mFilePath = fullFileStoragePath;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mMediaPlayer.reset(); // to set other data source FD
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(mFilePath); // FileNotFoundException
+                    mMediaPlayer.setDataSource(fileInputStream.getFD()); // IOException, IllegalArgumentException, IllegalStateException
+                    fileInputStream.close();
+
+                    mMediaPlayer.prepare();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    return;
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                mMediaPlayer.start();
+                mHandler.sendEmptyMessage(UPDATE_STATE_PLAYING);
+            }
+        }).start();
+    }
+
+    private void stopPlayMusic() {
+        mMediaPlayer.stop();
+        mMediaPlayer.reset();
+        mMediaPlayer.release();
+        mMediaPlayer = null;
+        setIconPlayOrPause(false);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        mIvCurrentPlayPauseIcon.setSelected(false);
+        setIconPlayOrPause(false);
     }
 
     @Override
@@ -116,5 +156,23 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
     public void onDestroy() {
         mCursor.close();
+        stopPlayMusic();
+    }
+
+    @Override
+    public boolean handleMessage(Message msg) {
+        int what = msg.what;
+        switch (what) {
+            case UPDATE_STATE_PLAYING:
+                setIconPlayOrPause(true);
+                return true;
+
+        }
+        return false;
+    }
+
+    private void setIconPlayOrPause(boolean isPlay) {
+//        Log.i("lanna", "updateIconPlayPause isPlay="+isPlay);
+        mIvCurrentPlayPauseIcon.setSelected(isPlay);
     }
 }
