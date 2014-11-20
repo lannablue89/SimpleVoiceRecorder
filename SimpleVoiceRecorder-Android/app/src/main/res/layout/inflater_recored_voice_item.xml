@@ -9,30 +9,38 @@
         android:layout_width="@dimen/inflater_icon_play_pause"
         android:layout_height="match_parent"
         android:src="@drawable/ic_play_pause_selector"
-        android:padding="@dimen/inflater_icon_padding"
+        android:padding="@dimen/padding_normal"
         android:scaleType="center" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:orientation="vertical"
         android:layout_height="match_parent"
-        android:padding="@dimen/inflater_text_padding">
+        android:padding="@dimen/padding_normal">
 
         <TextView
             android:id="@+id/item_record_voice_tv_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:gravity="bottom"
+            android:layout_above="@+id/item_record_voice_progressBar"
             android:text="@string/action_recorded_voices" />
 
         <TextView
             android:id="@+id/item_record_voice_tv_progress"
             android:layout_width="match_parent"
-            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:gravity="center"
+            android:gravity="right|bottom"
+            android:layout_above="@+id/item_record_voice_progressBar"
             android:text="@string/audio_progress_default_text" />
-    </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/item_record_voice_progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:max="100"
+            android:padding="@dimen/padding_min"/>
+    </RelativeLayout>
 
 </LinearLayout>

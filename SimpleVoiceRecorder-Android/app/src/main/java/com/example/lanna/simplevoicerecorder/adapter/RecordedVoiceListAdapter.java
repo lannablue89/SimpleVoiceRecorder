@@ -5,15 +5,14 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.CursorAdapter;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.example.lanna.simplevoicerecorder.database.MyDatabase;
 import com.example.lanna.simplevoicerecorder.helper.StoreAudioHelper;
@@ -33,19 +32,29 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         implements RecordedVoiceViewHolder.RecordedVoiceItemClickListener, Handler.Callback,
         MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
+    private static final int STATE_PLAY     = 1;
+    private static final int STATE_PAUSE    = 2;
+    private static final int STATE_CONTINUE = 3;
+    private static final int STATE_STOP     = 4;
+
     private static final int UPDATE_STATE_PLAYING = 1;
 
     private MyDatabase mDb;
+    private static final Uri mUri = Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE);
+
     private MediaPlayer mMediaPlayer;
     private int mFileIndex = -1;
-    private ImageView mIvCurrentPlayPauseIcon;
+    private RecordedVoiceViewHolder mCurrentViewHolder;
 
     private Handler mHandler;
+    private long mTimeStart;
+    private long mProgress;
+
+    private AudioModel mCurrentModel;
+    private CountDownTimer mCountDownTimer;
 
     public RecordedVoiceListAdapter(Context context, MyDatabase db) {
-        super(context,
-                db.getAudios(context, Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE)),
-                FLAG_REGISTER_CONTENT_OBSERVER);
+        super(context, db.getAudios(context, mUri), FLAG_REGISTER_CONTENT_OBSERVER);
         mDb = db;
         mHandler = new Handler(this);
     }
@@ -60,7 +69,7 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
     @Override
     public void onBindViewHolder(RecordedVoiceViewHolder holder, Cursor cursor) {
-        holder.updateData(mContext, cursor);
+        holder.updateData(cursor);
     }
 
     @Override
@@ -70,18 +79,16 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
     }
 
     @Override
-    public void onPlayPauseClick(ImageView ivPlayPause, int position, AudioModel item) {
+    public void onPlayPauseClick(RecordedVoiceViewHolder vh, int position, AudioModel item) {
 //        Utilities.makeToast(mContext, "onPlayPauseClick at " + position + ":" + item);
+
         if (null == item || TextUtils.isEmpty(item.getFilePath())) {
             Utilities.makeToast(mContext, "play item not available - stop");
-            setIconPlayOrPause(false);
+            setPlayOrPause(STATE_STOP);
             return;
         }
 
-        // TODO get set length of file (duration value)
-
         if (null == mMediaPlayer) {
-//            mMediaPlayer = MediaPlayer.create(mContext, R.raw.abc);
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setVolume(1, 1);
@@ -91,20 +98,15 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
         // check play new audio
         if (mFileIndex < 0 || mFileIndex != position) {
-            setIconPlayOrPause(false);
-            mIvCurrentPlayPauseIcon = ivPlayPause;
+            setPlayOrPause(STATE_PAUSE); // set old item to pause to start new one
+            mCurrentViewHolder = vh;
+            mCurrentModel = item;
             mFileIndex = position;
             startPlayMusic(StoreAudioHelper.getFileStoragePath(item.getFilePath())); // "Download/abcd.mp3"
         }
         // continue play/pause current audio
-        else if (null != mMediaPlayer) {
-            if (mMediaPlayer.isPlaying()) {
-                mMediaPlayer.pause();
-                setIconPlayOrPause(false);
-            } else {
-                mMediaPlayer.start();
-                setIconPlayOrPause(true);
-            }
+        else {
+            setPlayOrPause(mMediaPlayer.isPlaying() ? STATE_CONTINUE : STATE_PAUSE);
         }
     }
 
@@ -129,23 +131,24 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
                     e.printStackTrace();
                     return;
                 }
-                mMediaPlayer.start();
                 mHandler.sendEmptyMessage(UPDATE_STATE_PLAYING);
             }
         }).start();
     }
 
     private void stopPlayMusic() {
-        mMediaPlayer.stop();
-        mMediaPlayer.reset();
-        mMediaPlayer.release();
-        mMediaPlayer = null;
-        setIconPlayOrPause(false);
+        if (null != mMediaPlayer) {
+            mMediaPlayer.stop();
+            mMediaPlayer.reset();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+        setPlayOrPause(STATE_STOP);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        setIconPlayOrPause(false);
+        setPlayOrPause(STATE_STOP);
     }
 
     @Override
@@ -164,17 +167,57 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         int what = msg.what;
         switch (what) {
             case UPDATE_STATE_PLAYING:
-                setIconPlayOrPause(true);
+                setPlayOrPause(STATE_PLAY);
                 return true;
-
         }
         return false;
     }
 
-    private void setIconPlayOrPause(boolean isPlay) {
-//        Log.i("lanna", "updateIconPlayPause isPlay="+isPlay);
-        if (null != mIvCurrentPlayPauseIcon) {
-            mIvCurrentPlayPauseIcon.setSelected(isPlay);
+    private void setPlayOrPause(int state) {
+        if (null == mCurrentViewHolder)
+            return;
+
+//        Log.i("lanna", "setPlayOrPause isPlay="+isPlay);
+        if (state == STATE_STOP || state == STATE_PAUSE) {
+            mProgress = (state == STATE_PAUSE) ? System.currentTimeMillis() - mTimeStart : 0;
+            mTimeStart = 0;
+            mCurrentViewHolder.setProgress(mProgress);
+            mCurrentViewHolder.setPlayState(false);
+            mCountDownTimer.cancel();
+            if (state == STATE_PAUSE) {
+                mMediaPlayer.pause();
+            }
+        }
+        else {
+            mCurrentViewHolder.setPlayState(true);
+            if (state == STATE_PLAY) {
+                mProgress = 0;
+                mTimeStart = System.currentTimeMillis();
+            }
+            else { // STATE_CONTINUE
+                // this time maybe restart time, so we use mProgress to refill missed time when pause
+                mTimeStart = System.currentTimeMillis() - mProgress;
+            }
+            mCurrentViewHolder.setProgress(mProgress);
+            mCountDownTimer = new CountDownTimer(mCurrentModel.getDuration() - mProgress + 1000, 100) {
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    mProgress = System.currentTimeMillis() - mTimeStart;
+                    mCurrentViewHolder.setProgress(mProgress);
+                    if (mProgress >= mCurrentModel.getDuration()) {
+                        mProgress = 0;
+                        mCurrentViewHolder.setProgress(0);
+                        mCountDownTimer.cancel();
+                    }
+                }
+
+                @Override
+                public void onFinish() { }
+            };
+            mCountDownTimer.start();
+            mMediaPlayer.start();
         }
     }
+
 }

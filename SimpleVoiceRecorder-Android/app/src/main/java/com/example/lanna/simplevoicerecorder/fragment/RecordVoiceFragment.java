@@ -35,7 +35,9 @@ public class RecordVoiceFragment extends Fragment {
     private MediaRecorder mRecorder;
     private MyDatabase mDb;
     private AudioModel mAudioModel;
-    Uri mUri = Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE);
+
+    private Uri mUri = Uri.parse(MyDatabase.URI_TO_NOTIFY_DATA_UPDATE);
+    private long mTimeStart;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,6 +90,7 @@ public class RecordVoiceFragment extends Fragment {
         mRecorder.setOnInfoListener(infoListener);
         try {
             mRecorder.prepare();
+            mTimeStart = System.currentTimeMillis();
             mRecorder.start(); // Recording is now started
         } catch (IllegalStateException e) {
             e.printStackTrace();
@@ -99,25 +102,28 @@ public class RecordVoiceFragment extends Fragment {
     private void stopRecordVoice() {
         Utilities.makeToast(getActivity(), "stop Record Voice!");
         if (null != mRecorder) {
+            long duration = System.currentTimeMillis() - mTimeStart;
+
             mRecorder.stop();
             mRecorder.reset();   // You can reuse the object by going back to setAudioSource() step
             mRecorder.release(); // Now the object cannot be reused
             mRecorder = null;
 
             // save audio info
-            mDb.insertOrUpdateAudioAndNotify(getActivity(), mUri, mAudioModel);
+            mAudioModel.setDuration(duration);
+            mDb.insertOrUpdateAudioAndNotify(getActivity(), mUri, mAudioModel, true);
 
             // test data after db action
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        StoreAudioHelper.writeDBToSD(getActivity(), mDb.DATABASE_NAME);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }).start();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        StoreAudioHelper.writeDBToSD(getActivity(), mDb.DATABASE_NAME);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
 
         }
     }

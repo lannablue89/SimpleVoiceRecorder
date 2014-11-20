@@ -3,9 +3,12 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+
+    <dimen name="padding_max">12dp</dimen>
+    <dimen name="padding_normal">8dp</dimen>
+    <dimen name="padding_min">4dp</dimen>
+
     <dimen name="inflater_icon_play_pause">48dp</dimen>
-    <dimen name="inflater_icon_padding">8dp</dimen>
-    <dimen name="inflater_text_padding">8dp</dimen>
 
     <dimen name="item_recorded_audio_height">72dp</dimen>
 

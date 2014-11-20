@@ -3,13 +3,13 @@ package com.example.lanna.simplevoicerecorder.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.lanna.simplevoicerecorder.database.MyDatabase;
 import com.example.lanna.simplevoicerecorder.R;
-import com.example.lanna.simplevoicerecorder.helper.StoreAudioHelper;
 import com.example.lanna.simplevoicerecorder.model.AudioModel;
 
 /**
@@ -18,13 +18,14 @@ import com.example.lanna.simplevoicerecorder.model.AudioModel;
 public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     public interface RecordedVoiceItemClickListener {
-        public void onPlayPauseClick(ImageView ivPlayPause, int position, AudioModel item);
+        public void onPlayPauseClick(RecordedVoiceViewHolder vh, int position, AudioModel item);
 
     }
 
     private ImageView imgPlayPause;
     private TextView tvName;
     private TextView tvCurrentProgress;
+    private ProgressBar progressBar;
 
     private RecordedVoiceItemClickListener mItemClickListener;
     private AudioModel mModel;
@@ -40,6 +41,7 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements 
         imgPlayPause = (ImageView) itemView.findViewById(R.id.item_record_voice_ic_play_pause);
         tvName = (TextView) itemView.findViewById(R.id.item_record_voice_tv_name);
         tvCurrentProgress = (TextView) itemView.findViewById(R.id.item_record_voice_tv_progress);
+        progressBar = (ProgressBar) itemView.findViewById(R.id.item_record_voice_progressBar);
 
         imgPlayPause.setOnClickListener(this);
     }
@@ -50,21 +52,36 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements 
         switch (id) {
             case R.id.item_record_voice_ic_play_pause:
                 if (mItemClickListener != null) {
-                    mItemClickListener.onPlayPauseClick((ImageView)v, getPosition(), mModel);
+                    mItemClickListener.onPlayPauseClick(this, getPosition(), mModel);
                 }
                 break;
         }
     }
 
     public void updateData(AudioModel model) {
+//        Log.i("lanna", "updateData model=" + model);
         mModel = model;
 
-//        imgPlayPause.setSelected(false); // default false: show ic play
         tvName.setText(mModel.getName());
-        tvCurrentProgress.setText(mModel.getCurrentProgress()+"/"+mModel.getTimeLength());
+//        setPlayState(false); // default false: show ic play
+        setProgress(0);
     }
 
-    public void updateData(Context context, Cursor audioCursorItem) {
-        updateData(new AudioModel(context, audioCursorItem));
+    public void updateData(Cursor audioCursorItem) {
+        updateData(new AudioModel(audioCursorItem));
     }
+
+    public void setPlayState(boolean isPlay) {
+        imgPlayPause.setSelected(isPlay);
+    }
+
+    public void setProgress(long progress) {
+        if (progress > mModel.getDuration()) {
+            progress = mModel.getDuration();
+        }
+        Log.i("lanna", "updateData progress:"+progress+", "+progress*100/mModel.getDuration()+"%");
+        tvCurrentProgress.setText(String.format("%d/%d", progress, mModel.getDuration()));
+        progressBar.setProgress((int) (progress*100/mModel.getDuration()));
+    }
+
 }

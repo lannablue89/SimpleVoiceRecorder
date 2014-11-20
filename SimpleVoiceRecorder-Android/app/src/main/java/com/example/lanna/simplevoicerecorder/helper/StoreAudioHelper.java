@@ -1,9 +1,6 @@
 package com.example.lanna.simplevoicerecorder.helper;
 
 import android.content.Context;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -12,8 +9,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by Lanna on 11/13/14.
@@ -51,22 +46,6 @@ public class StoreAudioHelper {
     public static String getFileStoragePath(String filePath) {
         return String.format("%s/%s",
                 Environment.getExternalStorageDirectory(), filePath);
-    }
-
-    /**
-     *
-     * @param context
-     * @param name
-     * @return -1 if file not existed
-     */
-    public static long getDuration(Context context, String name) {
-        MediaPlayer mp = MediaPlayer.create(context, Uri.parse(getFileStoragePath(name)));
-        if (mp != null) {
-            int duration = mp.getDuration();
-            mp.release();
-            return duration;
-        }
-        return -1;
     }
 
     public static void writeDBToSD(Context context, String DB_NAME) throws IOException {

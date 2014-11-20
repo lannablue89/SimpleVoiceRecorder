@@ -28,7 +28,7 @@ public class MyDatabase extends SQLiteAssetHelper {
     public static String FLD_AUDIO_NAME             = "name";
     public static String FLD_AUDIO_FILENAME         = "file_name";
     public static String FLD_AUDIO_CREATED          = "created";
-    public static String FLD_AUDIO_CURRENT_PROGRESS = "current_progress";
+    public static String FLD_AUDIO_DURATION         = "duration";
 
 //    public static byte FLD_AUDIO_ID_INDEX               = 0;
 //    public static byte FLD_AUDIO_NAME_INDEX             = 1;
@@ -45,7 +45,8 @@ public class MyDatabase extends SQLiteAssetHelper {
         SQLiteDatabase db = getReadableDatabase();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
-        String [] sqlSelect = { FLD_ROW_ID, FLD_AUDIO_NAME, FLD_AUDIO_FILENAME, FLD_AUDIO_CREATED, FLD_AUDIO_CURRENT_PROGRESS };
+        String [] sqlSelect = { FLD_ROW_ID, FLD_AUDIO_NAME, FLD_AUDIO_FILENAME,
+                FLD_AUDIO_CREATED, FLD_AUDIO_DURATION };
 
         qb.setTables(TBL_AUDIO);
         Cursor c = qb.query(db, sqlSelect, FLD_AUDIO_FILENAME + " IS NOT NULL ", null, null, null, null);
@@ -56,7 +57,7 @@ public class MyDatabase extends SQLiteAssetHelper {
         return c;
     }
 
-    public long insertOrUpdateAudioAndNotify(Context context, Uri uri, AudioModel audioModel) {
+    public long insertOrUpdateAudioAndNotify(Context context, Uri uri, AudioModel audioModel, boolean isNotify) {
         long result;
         SQLiteDatabase db = getWritableDatabase();
 
@@ -64,7 +65,7 @@ public class MyDatabase extends SQLiteAssetHelper {
         values.put(FLD_AUDIO_NAME, audioModel.getName());
         values.put(FLD_AUDIO_FILENAME, audioModel.getFilePath());
         values.put(FLD_AUDIO_CREATED, audioModel.getTimeCreated());
-        values.put(FLD_AUDIO_CURRENT_PROGRESS, audioModel.getCurrentProgress());
+        values.put(FLD_AUDIO_DURATION, audioModel.getDuration());
 
         if (audioModel.getAudioID() > 0) {
             result = db.update(TBL_AUDIO, values, FLD_AUDIO_ID + "=" + audioModel.getAudioID(), null);
@@ -76,7 +77,7 @@ public class MyDatabase extends SQLiteAssetHelper {
         }
         db.close();
 
-        if (result > 0 && context != null && uri != null) {
+        if (isNotify && result > 0 && context != null && uri != null) {
             context.getContentResolver().notifyChange(uri, null);
             Log.i("lanna", "content resolver notifyChange uri:"+uri);
         }

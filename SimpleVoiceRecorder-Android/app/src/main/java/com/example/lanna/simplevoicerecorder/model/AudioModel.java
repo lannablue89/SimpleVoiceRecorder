@@ -16,33 +16,30 @@ public class AudioModel {
     protected String filePath;
 
     protected long timeCreated;
-    protected long timeLength;
-    protected long currentProgress;
+    protected long duration;
 
     public AudioModel(String name, String filename, long timeCreated) {
         this.name = name;
         this.filePath = filename;
         this.timeCreated = timeCreated;
-        this.currentProgress = 0;
     }
 
-    public AudioModel(Context context, Cursor c) {
+    public AudioModel(Cursor c) {
         this.audioID = c.getLong(c.getColumnIndex(MyDatabase.FLD_ID_ALIAS));
         this.name = c.getString(c.getColumnIndex(MyDatabase.FLD_AUDIO_NAME));
         this.filePath = c.getString(c.getColumnIndex(MyDatabase.FLD_AUDIO_FILENAME));
         this.timeCreated = c.getLong(c.getColumnIndex(MyDatabase.FLD_AUDIO_CREATED));
-        this.currentProgress = c.getLong(c.getColumnIndex(MyDatabase.FLD_AUDIO_CURRENT_PROGRESS));
-        updateTimeLength(context);
+        this.duration = c.getLong(c.getColumnIndex(MyDatabase.FLD_AUDIO_DURATION));
     }
 
     @Override
     public String toString() {
         return new StringBuilder()
 //                .append("id:").append(audioID)
-//                .append(", name:").append(name)
-                .append(", filename:").append(filePath)
+                .append(", name:").append(name)
+//                .append(", filename:").append(filePath)
 //                .append(", timeCreated:").append(timeCreated)
-//                .append(", currentProgress:").append(currentProgress)
+                .append(", duration:").append(duration)
                 .toString();
     }
 
@@ -70,28 +67,12 @@ public class AudioModel {
         this.timeCreated = timeCreated;
     }
 
-    public long getTimeLength() {
-        return timeLength;
+    public long getDuration() {
+        return duration;
     }
 
-    public void setTimeLength(long timeLength) {
-        this.timeLength = timeLength;
-    }
-
-    public void updateTimeLength(Context context) {
-        if (context != null) {
-            this.timeLength = StoreAudioHelper.getDuration(context, this.name); // TODO
-        } else {
-            this.timeLength = 0;
-        }
-    }
-
-    public long getCurrentProgress() {
-        return currentProgress;
-    }
-
-    public void setCurrentProgress(long currentProgress) {
-        this.currentProgress = currentProgress;
+    public void setDuration(long duration) {
+        this.duration = duration;
     }
 
     public String getName() {
