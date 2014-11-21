@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.CursorAdapter;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,7 +99,7 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
 
         // check play new audio
         if (mFileIndex < 0 || mFileIndex != position) {
-            setPlayOrPause(STATE_PAUSE); // set old item to pause to start new one
+            setPlayOrPause(STATE_STOP); // set old item to pause to start new one
             mCurrentViewHolder = vh;
             mCurrentModel = item;
             mFileIndex = position;
@@ -106,7 +107,7 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         }
         // continue play/pause current audio
         else {
-            setPlayOrPause(mMediaPlayer.isPlaying() ? STATE_CONTINUE : STATE_PAUSE);
+            setPlayOrPause(mMediaPlayer.isPlaying() ? STATE_PAUSE : STATE_CONTINUE);
         }
     }
 
@@ -143,7 +144,6 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
-        setPlayOrPause(STATE_STOP);
     }
 
     @Override
@@ -160,6 +160,7 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
     public void onDestroy() {
         mCursor.close();
         stopPlayMusic();
+        setPlayOrPause(STATE_STOP);
     }
 
     @Override
@@ -177,16 +178,18 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         if (null == mCurrentViewHolder)
             return;
 
-//        Log.i("lanna", "setPlayOrPause isPlay="+isPlay);
+        Log.i("lanna", "setPlayOrPause state=" + state + " (PLAY = 1, PAUSE = 2, CONTINUE = 3, STOP = 4)");
         if (state == STATE_STOP || state == STATE_PAUSE) {
             mProgress = (state == STATE_PAUSE) ? System.currentTimeMillis() - mTimeStart : 0;
             mTimeStart = 0;
-            mCurrentViewHolder.setProgress(mProgress);
-            mCurrentViewHolder.setPlayState(false);
-            mCountDownTimer.cancel();
             if (state == STATE_PAUSE) {
                 mMediaPlayer.pause();
+            } else {
+                mMediaPlayer.stop();
             }
+            mCountDownTimer.cancel();
+            mCurrentViewHolder.setProgress(mProgress);
+            mCurrentViewHolder.setPlayState(false);
         }
         else {
             mCurrentViewHolder.setPlayState(true);
