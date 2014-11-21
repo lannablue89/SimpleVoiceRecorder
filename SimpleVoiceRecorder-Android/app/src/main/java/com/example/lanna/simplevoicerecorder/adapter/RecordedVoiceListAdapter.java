@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.CursorAdapter;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -157,12 +156,6 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         return false;
     }
 
-    public void onDestroy() {
-        mCursor.close();
-        stopPlayMusic();
-        setPlayOrPause(STATE_STOP);
-    }
-
     @Override
     public boolean handleMessage(Message msg) {
         int what = msg.what;
@@ -178,14 +171,16 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
         if (null == mCurrentViewHolder)
             return;
 
-        Log.i("lanna", "setPlayOrPause state=" + state + " (PLAY = 1, PAUSE = 2, CONTINUE = 3, STOP = 4)");
+//        Log.i("lanna", "setPlayOrPause state=" + state + " (PLAY = 1, PAUSE = 2, CONTINUE = 3, STOP = 4)");
         if (state == STATE_STOP || state == STATE_PAUSE) {
             mProgress = (state == STATE_PAUSE) ? System.currentTimeMillis() - mTimeStart : 0;
             mTimeStart = 0;
-            if (state == STATE_PAUSE) {
-                mMediaPlayer.pause();
-            } else {
-                mMediaPlayer.stop();
+            if (null != mMediaPlayer) {
+                if (state == STATE_PAUSE) {
+                    mMediaPlayer.pause();
+                } else {
+                    mMediaPlayer.stop();
+                }
             }
             mCountDownTimer.cancel();
             mCurrentViewHolder.setProgress(mProgress);
@@ -221,6 +216,12 @@ public class RecordedVoiceListAdapter extends CursorAdapter<RecordedVoiceViewHol
             mCountDownTimer.start();
             mMediaPlayer.start();
         }
+    }
+
+    public void onDestroy() {
+        mCursor.close();
+        setPlayOrPause(STATE_STOP);
+        stopPlayMusic();
     }
 
 }

@@ -1,9 +1,7 @@
 package com.example.lanna.simplevoicerecorder.adapter;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -80,7 +78,7 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements 
         if (progress > duration) {
             progress = duration; // progress can not larger than duration
         }
-        Log.i("lanna", "updateData item:"+mModel+", progress:"+progress+", percent:"+progress*100/duration+"%");
+//        Log.i("lanna", "updateData item:"+mModel+", progress:"+progress+", percent:"+progress*100/duration+"%");
         tvCurrentProgress.setText(String.format("%s:%s/%s:%s",
                 getMinus(progress), getSecond(progress), getMinus(duration), getSecond(duration)));
         progressBar.setProgress((int) (progress*100/duration));
