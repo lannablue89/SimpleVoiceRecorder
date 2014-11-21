@@ -76,12 +76,26 @@ public class RecordedVoiceViewHolder extends RecyclerView.ViewHolder implements 
     }
 
     public void setProgress(long progress) {
-        if (progress > mModel.getDuration()) {
-            progress = mModel.getDuration();
+        long duration = mModel.getDuration();
+        if (progress > duration) {
+            progress = duration; // progress can not larger than duration
         }
-        Log.i("lanna", "updateData progress:"+progress+", "+progress*100/mModel.getDuration()+"%");
-        tvCurrentProgress.setText(String.format("%d/%d", progress, mModel.getDuration()));
-        progressBar.setProgress((int) (progress*100/mModel.getDuration()));
+        Log.i("lanna", "updateData item:"+mModel+", progress:"+progress+", percent:"+progress*100/duration+"%");
+        tvCurrentProgress.setText(String.format("%s:%s/%s:%s",
+                getMinus(progress), getSecond(progress), getMinus(duration), getSecond(duration)));
+        progressBar.setProgress((int) (progress*100/duration));
+    }
+
+    private String getMinus(long ms) {
+        return timeString(ms/1000/60);
+    }
+
+    private String getSecond(long ms) {
+        return timeString(ms/1000%60);
+    }
+
+    private String timeString(long time) {
+        return (time < 10 ? "0" : "") + time;
     }
 
 }
